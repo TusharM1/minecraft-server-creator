@@ -4,8 +4,9 @@ import os
 import shutil
 import subprocess
 import sys
+import math
 
-print("Minecraft Server Creator v1.0")
+print("Minecraft Server Creator v1.1")
 print("This script will scrape the mcversion.net website and download a server")
 print("It will then setup the server\n")
 
@@ -33,12 +34,30 @@ while True:
 		category = version_categories[1]
 		break
 	if version == "view":
+		columns = 4
 		print("Release: ")
-		for current_version in server_links[version_categories[0]].keys():
-			print("\t%s" % current_version)
+		release = list(server_links[version_categories[0]].keys())
+		rows = math.ceil(len(release) / columns)
+		for i in range(rows):
+			print("\t", end="")
+			for j in range(columns):
+				if len(release) > i + j * rows:
+					print(release[i + j * rows], end="")
+					spacing = math.ceil(max((24 - len(release[i + j * rows])) / 8, 1)) * "\t"
+					print(spacing, end="")
+			print()	
 		print("Snapshot: ")
-		for current_version in server_links[version_categories[1]].keys():
-			print("\t%s" % current_version)
+		snapshot = list(server_links[version_categories[1]].keys())
+		rows = math.ceil(len(snapshot) / columns)
+		for i in range(rows):
+			print("\t", end="")
+			for j in range(columns):
+				if len(snapshot) > i + j * rows:
+					print(snapshot[i + j * rows], end="")
+					spacing = math.ceil(max((24 - len(snapshot[i + j * rows])) / 8, 1)) * "\t"
+					print(spacing, end="")
+			print()
+		version = input("Enter a version number, \"release\" for the latest release version, or \"snapshot\" for the latest snapshot version: ")	
 		continue		
 	if version in server_links.get(version_categories[0]).keys():
 		category = version_categories[0]
@@ -46,8 +65,6 @@ while True:
 	if version in server_links.get(version_categories[1]).keys():
 		category = version_categories[1]
 		break
-	# TODO change this input text	
-	version = input("Invalid input: ")
 
 # Directory Name,
 	# Directory already exists, override or update?

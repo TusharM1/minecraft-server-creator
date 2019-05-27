@@ -1,2 +1,9 @@
 # pycache
 __pycache__
+
+# Test File
+test.py
+
+# PyInstaller
+build/
+create_server.spec
