@@ -6,11 +6,11 @@ import subprocess
 import sys
 import math
 
-print("Minecraft Server Creator v1.2")
+print("Minecraft Server Creator v1.3")
 print("This script will scrape the mcversion.net website and download a server")
 print("It will then setup the server\n")
 
-# Create, Manage, Update	
+# Create, Manage, Update
 
 mcversions = BeautifulSoup(requests.get("https://mcversions.net/").text, "html.parser")
 server_links = dict()
@@ -69,25 +69,31 @@ while True:
 
 print("Creating server with version: " + version)
 
-if os.path.exists(version):
-	shutil.rmtree(version)
+if getattr(sys, 'frozen', False):
+    application_path = os.path.dirname(sys.executable)
+else:
+    application_path = os.path.dirname(os.path.abspath(__file__))
+server_directory = application_path + "/" + version
 
-os.makedirs(version)
-with open(version + "/server.jar", "wb") as jar:
+if os.path.exists(server_directory):
+	shutil.rmtree(server_directory)
+
+os.makedirs(server_directory)
+with open(server_directory + "/server.jar", "wb") as jar:
     jar.write(requests.get(server_links[category][version]).content)
 
-eula = open(version + "/eula.txt", "w")
+eula = open(server_directory + "/eula.txt", "w")
 eula.write("eula=true")
 eula.close()
 
 if os.name == "nt":
-	run = open(version + "/run.bat", "w")
+	run = open(server_directory + "/run.bat", "w")
 	run.write("java -Xmx1G -Xms1G -jar server.jar nogui")
 	run.close()
-	subprocess.Popen("cd " + version + "; run.bat", stdout=sys.stdout, shell=True).communicate()
+	subprocess.Popen("cd \"" + server_directory + "\"; run.bat", stdout=sys.stdout, shell=True).communicate()
 else:
-	run = open(version + "/run.sh", "w")
+	run = open(server_directory + "/run.sh", "w")
 	run.write("java -Xmx1G -Xms1G -jar server.jar nogui")
 	run.close()
-	os.chmod(version + "/run.sh", os.stat(version + "/run.sh").st_mode | 0o111)
-	subprocess.Popen("cd " + version + "; ./run.sh", stdout=sys.stdout, shell=True).communicate()
+	os.chmod(server_directory + "/run.sh", os.stat(server_directory + "/run.sh").st_mode | 0o111)
+	subprocess.Popen("cd \"" + server_directory + "\"; ./run.sh", stdout=sys.stdout, shell=True).communicate()
