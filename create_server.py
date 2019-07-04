@@ -6,7 +6,7 @@ import subprocess
 import sys
 import math
 
-print("Minecraft Server Creator v1.1")
+print("Minecraft Server Creator v1.2")
 print("This script will scrape the mcversion.net website and download a server")
 print("It will then setup the server\n")
 
@@ -57,7 +57,7 @@ while True:
 					spacing = math.ceil(max((24 - len(snapshot[i + j * rows])) / 8, 1)) * "\t"
 					print(spacing, end="")
 			print()
-		version = input("Enter a version number, \"release\" for the latest release version, or \"snapshot\" for the latest snapshot version: ")	
+		version = input("Please enter a valid version number, \"release\" for the latest release version, or \"snapshot\" for the latest snapshot version: ")	
 		continue		
 	if version in server_links.get(version_categories[0]).keys():
 		category = version_categories[0]
@@ -65,6 +65,9 @@ while True:
 	if version in server_links.get(version_categories[1]).keys():
 		category = version_categories[1]
 		break
+	version = input("Please enter a valid version number, \"release\" for the latest release version, or \"snapshot\" for the latest snapshot version: ")	
+
+print("Creating server with version: " + version)
 
 # Directory Name,
 	# Directory already exists, override or update?
@@ -86,4 +89,14 @@ eula = open(version + "/eula.txt", "w")
 eula.write("eula=true")
 eula.close()
 
-subprocess.Popen("cd " + version + "; java -Xmx1G -Xms1G -jar server.jar", stdout=sys.stdout, shell=True).communicate()
+if os.name == "nt":
+	run = open(version + "/run.bat", "w")
+	run.write("java -Xmx1G -Xms1G -jar server.jar nogui")
+	run.close()
+	subprocess.Popen("cd " + version + "; run.bat", stdout=sys.stdout, shell=True).communicate()
+else:
+	run = open(version + "/run.sh", "w")
+	run.write("java -Xmx1G -Xms1G -jar server.jar nogui")
+	run.close()
+	os.chmod(version + "/run.sh", os.stat(version + "/run.sh").st_mode | 0o111)
+	subprocess.Popen("cd " + version + "; ./run.sh", stdout=sys.stdout, shell=True).communicate()
