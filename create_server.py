@@ -69,17 +69,8 @@ while True:
 
 print("Creating server with version: " + version)
 
-# Directory Name,
-	# Directory already exists, override or update?
-# Sign EULA, maybe
-
 if os.path.exists(version):
 	shutil.rmtree(version)
-	# print("Directory " + version + " already exists. ")
-	# while True:
-	# 	print("Enter \"reinstall\" to delete and recreate the server. All files will be deleted")
-	# 	print("Enter \"create\" to create another server of the same version")	
-	# 	recreate = input()
 
 os.makedirs(version)
 with open(version + "/server.jar", "wb") as jar:
