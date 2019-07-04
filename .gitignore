@@ -6,4 +6,5 @@ test.py
 
 # PyInstaller
 build/
+dist/
 create_server.spec
