@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from bs4 import BeautifulSoup
 import requests
 import os
@@ -11,13 +13,15 @@ print("This script will scrape the mcversion.net website and download a server")
 print("It will then setup the server\n")
 
 # Create, Manage, Update
-
-mcversions = BeautifulSoup(requests.get("https://mcversions.net/").text, "html.parser")
+url = "https://mcversions.net"
+mcversions = BeautifulSoup(requests.get(url).text, "html.parser")
 server_links = dict()
-version_categories = ["Stable Releases", "Snapshot Previews"]
+version_categories = ["Stable Releases", "Snapshot Preview"]
+version_sections = list(mcversions.find_all("div", class_='versions')[0].children)
 for i in range(len(version_categories)):
-	category = mcversions.find_all(class_="list-group")[i]
-	server_links[version_categories[i]] = dict(zip([version["id"] for version in category.find_all("li")], [link["href"] for link in category.find_all("a", text="Server Jar")]))
+	version_items = version_sections[i].find_all(class_='item')
+	version_items = list(filter(lambda version_item: len(version_item['class']) == 1, version_items))
+	server_links[version_categories[i]] = dict(zip([version["id"] for version in version_items], [link.find("a", text="Download")["href"] for link in version_items]))
 
 version = input("Please enter a Minecraft version, \n" + 
 				"\"view\" to see all versions, \n" + 
@@ -35,28 +39,18 @@ while True:
 		break
 	if version == "view":
 		columns = 4
-		print("Release: ")
-		release = list(server_links[version_categories[0]].keys())
-		rows = math.ceil(len(release) / columns)
-		for i in range(rows):
-			print("\t", end="")
-			for j in range(columns):
-				if len(release) > i + j * rows:
-					print(release[i + j * rows], end="")
-					spacing = math.ceil(max((24 - len(release[i + j * rows])) / 8, 1)) * "\t"
-					print(spacing, end="")
-			print()	
-		print("Snapshot: ")
-		snapshot = list(server_links[version_categories[1]].keys())
-		rows = math.ceil(len(snapshot) / columns)
-		for i in range(rows):
-			print("\t", end="")
-			for j in range(columns):
-				if len(snapshot) > i + j * rows:
-					print(snapshot[i + j * rows], end="")
-					spacing = math.ceil(max((24 - len(snapshot[i + j * rows])) / 8, 1)) * "\t"
-					print(spacing, end="")
-			print()
+		for i in range(len(version_categories)):
+			print(version_categories[i] + ": ")
+			release = list(server_links[version_categories[i]].keys())
+			rows = math.ceil(len(release) / columns)
+			for i in range(rows):
+				print("\t", end="")
+				for j in range(columns):
+					if len(release) > i + j * rows:
+						print(release[i + j * rows], end="")
+						spacing = math.ceil(max((24 - len(release[i + j * rows])) / 8, 1)) * "\t"
+						print(spacing, end="")
+				print()	
 		version = input("Please enter a valid version number, \"release\" for the latest release version, or \"snapshot\" for the latest snapshot version: ")	
 		continue		
 	if version in server_links.get(version_categories[0]).keys():
@@ -69,6 +63,9 @@ while True:
 
 print("Creating server with version: " + version)
 
+download = BeautifulSoup(requests.get(url + server_links[category][version]).text, "html.parser")
+mojang_url = download.find_all('a',class_="button")[0]['href']
+
 if getattr(sys, 'frozen', False):
     application_path = os.path.dirname(sys.executable)
 else:
@@ -80,7 +77,7 @@ if os.path.exists(server_directory):
 
 os.makedirs(server_directory)
 with open(server_directory + "/server.jar", "wb") as jar:
-    jar.write(requests.get(server_links[category][version]).content)
+    jar.write(requests.get(mojang_url).content)
 
 eula = open(server_directory + "/eula.txt", "w")
 eula.write("eula=true")
