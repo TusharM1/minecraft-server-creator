@@ -8,7 +8,7 @@ import subprocess
 import sys
 import math
 
-print("Minecraft Server Creator v1.3")
+print("Minecraft Server Creator v1.4")
 print("This script will scrape the mcversion.net website and download a server")
 print("It will then setup the server\n")
 
