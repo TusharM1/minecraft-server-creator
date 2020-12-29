@@ -24,10 +24,13 @@ for entry in response["versions"]:
 
 version = input("Please enter a Minecraft version, \n" + 
 				"\"view\" to see all versions, \n" + 
-				"\"release\" for the latest release version, or\n" + 
-				"\"snapshot\" for the latest snapshot version: ")
+				"\"release\" for the latest release version, \n" + 
+				"\"snapshot\" for the latest snapshot version, or\n" +
+				"\"quit\" to quit: ")
 
 while True:
+	if version == "quit":
+		sys.exit(0)
 	if version == "release":
 		version = response["latest"]["release"]
 		version_url = release[version]
@@ -38,25 +41,24 @@ while True:
 		break
 	if version == "view":
 		print("Release:")
-		count = 0
-		for entry in release.keys():
-			if count < 4:
-				print(entry + "\t", end="")
-				count += 1
-			else:
-				print(entry)
-				count = 0
+		keys = list(release.keys())
+		for a, b, c in zip(keys[::3], keys[1::3], keys[2::3]):
+			print('{:<20}{:<20}{:<}'.format(a, b, c))
+		if len(keys) % 3 != 1:
+			print(keys[-1])
+		elif len(keys) % 3 != 1:
+			print('{:<20}{:<}'.format(keys[-1], keys[-2]))
+
 		print("\n")
 		print("Snapshot:")
-		count = 0
-		for entry in snapshot.keys():
-			if count < 4:
-				print(entry + "\t\t", end="")
-				count += 1
-			else:
-				print(entry)
-				count = 0
-		print("\n")			
+		keys = list(snapshot.keys())
+		for a, b, c in zip(keys[::3], keys[1::3], keys[2::3]):
+			print('{:<25}{:<25}{:<}'.format(a, b, c))
+		if len(keys) % 3 != 1:
+			print(keys[-1])
+		elif len(keys) % 3 != 1:
+			print('{:<20}{:<}'.format(keys[-1], keys[-2]))	
+		print("\n")		
 	elif version in release.keys():
 		version_url = release[version]
 		break
