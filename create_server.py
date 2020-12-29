@@ -8,7 +8,7 @@ import subprocess
 import sys
 
 # Toggle whether to run in release mode or debug mode
-release_mode = False
+release_mode = True
 
 # Introduction and download/load JSON file containing server versions
 if release_mode:
