@@ -7,18 +7,11 @@ import shutil
 import subprocess
 import sys
 
-# Toggle whether to run in release mode or debug mode
-release_mode = True
-
 # Introduction and download/load JSON file containing server versions
-if release_mode:
-	print("Minecraft Server Creator v2.1")
-	print("This script will download the server file from the official mojang.com website and set it up.")
-	print("You can also specify the version or view the available versions by specifying it as a command line argument.")
-	response = json.loads(requests.get("https://launchermeta.mojang.com/mc/game/version_manifest.json").text)
-else:
-	with open("version_manifest.json") as version_manifest:
-		response = json.loads(version_manifest.read())			
+print("Minecraft Server Creator v2.1")
+print("This script will download the server file from the official mojang.com website and set it up.")
+print("You can also specify the version or view the available versions by specifying it as a command line argument.")
+response = json.loads(requests.get("https://launchermeta.mojang.com/mc/game/version_manifest.json").text)			
 
 # Read option from command line or from stdin
 if len(sys.argv) - 1 == 1:
@@ -93,40 +86,39 @@ except:
 
 print("Creating server with version: " + version)
 
-if release_mode:
-	response = json.loads(requests.get(version_url).text)
+response = json.loads(requests.get(version_url).text)
 
-	if getattr(sys, 'frozen', False):
-		application_path = os.path.dirname(sys.executable)
-	else:
-		application_path = os.path.dirname(os.path.abspath(__file__))
-	server_directory = application_path + "/" + version
+if getattr(sys, 'frozen', False):
+	application_path = os.path.dirname(sys.executable)
+else:
+	application_path = os.path.dirname(os.path.abspath(__file__))
+server_directory = application_path + "/" + version
 
-	if os.path.exists(server_directory):
-		shutil.rmtree(server_directory)
+if os.path.exists(server_directory):
+	shutil.rmtree(server_directory)
 
-	os.makedirs(server_directory)
-	with open(server_directory + "/server.jar", "wb") as jar:
-		jar.write(requests.get(response["downloads"]["server"]["url"]).content)
+os.makedirs(server_directory)
+with open(server_directory + "/server.jar", "wb") as jar:
+	jar.write(requests.get(response["downloads"]["server"]["url"]).content)
 
-	eula = open(server_directory + "/eula.txt", "w")
-	eula.write("eula=true")
-	eula.close()
+eula = open(server_directory + "/eula.txt", "w")
+eula.write("eula=true")
+eula.close()
 
-	if os.name == "nt":
-		run = open(server_directory + "/run.bat", "w")
-		run.write("java -Xmx1G -Xms1G -jar server.jar nogui")
-		run.close()
-		try:
-			subprocess.Popen("cd \"" + server_directory + "\"; run.bat", stdout=sys.stdout, shell=True).communicate()
-		except:
-			print("\nThe server was exited unexpectedly.")
-	else:
-		run = open(server_directory + "/run.sh", "w")
-		run.write("java -Xmx1G -Xms1G -jar server.jar nogui")
-		run.close()
-		os.chmod(server_directory + "/run.sh", os.stat(server_directory + "/run.sh").st_mode | 0o111)
-		try:
-			subprocess.Popen("cd \"" + server_directory + "\"; ./run.sh", stdout=sys.stdout, shell=True).communicate()	
-		except:
-			print("\nThe server was exited unexpectedly.")
+if os.name == "nt":
+	run = open(server_directory + "/run.bat", "w")
+	run.write("java -Xmx1G -Xms1G -jar server.jar nogui")
+	run.close()
+	try:
+		subprocess.Popen("cd \"" + server_directory + "\"; run.bat", stdout=sys.stdout, shell=True).communicate()
+	except:
+		print("\nThe server was exited unexpectedly.")
+else:
+	run = open(server_directory + "/run.sh", "w")
+	run.write("java -Xmx1G -Xms1G -jar server.jar nogui")
+	run.close()
+	os.chmod(server_directory + "/run.sh", os.stat(server_directory + "/run.sh").st_mode | 0o111)
+	try:
+		subprocess.Popen("cd \"" + server_directory + "\"; ./run.sh", stdout=sys.stdout, shell=True).communicate()	
+	except:
+		print("\nThe server was exited unexpectedly.")
