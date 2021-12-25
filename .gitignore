@@ -9,3 +9,5 @@ create_server.spec
 # Development
 1.16.4/
 *.json
+venv/
+.idea/
